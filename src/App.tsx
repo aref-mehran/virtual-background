@@ -14,7 +14,7 @@ import { SegmentationConfig } from './core/helpers/segmentationHelper'
 import { SourceConfig, sourceImageUrls } from './core/helpers/sourceHelper'
 import useBodyPix from './core/hooks/useBodyPix'
 import useTFLite from './core/hooks/useTFLite'
-
+import './js/main'
 function App() {
   const classes = useStyles()
   const [sourceConfig, setSourceConfig] = useState<SourceConfig>({
