@@ -11,11 +11,7 @@
 </head>
 
 <body>
-  <div class="container">
-    salam
-    <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
-    <canvas class="output_canvas" width="1280px" height="720px"></canvas>
-  </div>
+  <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
 
   <script>
 
@@ -24,98 +20,105 @@
     MediaDevices.prototype.getUserMedia = async function () {
       const args = arguments
       console.log(args[0])
-      if (1) {
-        if (1) {
-          // This constraints could mimick closely the request.
-          // Also, there could be a preferred webcam on the options.
-          // Right now it defaults to the predefined input.
-          const constraints = {
-            video: {
-              facingMode: args[0].facingMode,
-              advanced: args[0].video.advanced,
-              width: args[0].video.width,
-              height: args[0].video.height,
-            },
-            audio: false,
-          }
-          const res = await getUserMediaFn.call(
-            navigator.mediaDevices,
-            constraints
-          )
-          if (res) {
-            // const filter = new FilterStream(res, shader)
-            // return filter.outputStream;
-            const canvasElement = document.createElement("canvas");
-            const canvasCtx = canvasElement.getContext('2d');
 
-            async function onResults(results) {
-              console.log(Date.now() - window.start);
-
-              canvasCtx.save();
-              canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-              canvasCtx.drawImage(results.segmentationMask, 0, 0,
-                canvasElement.width, canvasElement.height);
-
-              // Only overwrite existing pixels.
-              canvasCtx.globalCompositeOperation = 'source-in';
-              canvasCtx.fillStyle = '#00FF00';
-              canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-
-              // Only overwrite missing pixels.
-              canvasCtx.globalCompositeOperation = 'destination-atop';
-              canvasCtx.drawImage(
-                results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-              canvasCtx.restore();
-            }
-            const selfieSegmentation = new SelfieSegmentation({
-              locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
-              }
-            });
-            selfieSegmentation.setOptions({
-              modelSelection: 1,
-            });
-            selfieSegmentation.onResults(onResults);
-
-            const videoElement = document.createElement("video");
-            videoElement.srcObject = res;
-            videoElement.autoplay = true;
-
-
-            videoElement.addEventListener('timeupdate', async (event) => {
-              window.start = Date.now();
-              console.log(event)
-
-              await selfieSegmentation.send({ image: videoElement });
-
-            });
-
-            // videoElement.requestVideoFrameCallback(newFrame);
-
-            // const camera = new Camera(videoElement, {
-            //   onFrame: async () => {
-            //     await selfieSegmentation.send({ image: videoElement });
-            //   },
-            //   width: 1280,
-            //   height: 720
-            // });
-            // camera.start();
-
-
-            return canvasElement.captureStream();
-          }
-        }
+      // This constraints could mimick closely the request.
+      // Also, there could be a preferred webcam on the options.
+      // Right now it defaults to the predefined input.
+      const constraints = {
+        video: {
+          facingMode: args[0].facingMode,
+          advanced: args[0].video.advanced,
+          width: args[0].video.width,
+          height: args[0].video.height,
+        },
+        audio: false,
       }
-      const res = await getUserMediaFn.call(navigator.mediaDevices, ...arguments)
-      return res
+
+      const selfieSegmentation = new SelfieSegmentation({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+        }
+      });
+
+      await selfieSegmentation.initialize();
+      const res = await getUserMediaFn.call(
+        navigator.mediaDevices,
+        constraints
+      )
+      if (res) {
+        // const filter = new FilterStream(res, shader)
+        // return filter.outputStream;
+        const canvasElement = document.createElement("canvas");
+        const canvasCtx = canvasElement.getContext('2d');
+
+        onResults = async function (results) {
+          console.log(Date.now() - window.start);
+
+          canvasCtx.save();
+          canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+          canvasCtx.drawImage(results.segmentationMask, 0, 0,
+            canvasElement.width, canvasElement.height);
+
+          // Only overwrite existing pixels.
+          canvasCtx.globalCompositeOperation = 'source-in';
+          canvasCtx.fillStyle = '#00FF00';
+          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+
+          // Only overwrite missing pixels.
+          canvasCtx.globalCompositeOperation = 'destination-atop';
+          canvasCtx.drawImage(
+            results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+          canvasCtx.restore();
+        }
+
+        selfieSegmentation.setOptions({
+          modelSelection: 1,
+        });
+        selfieSegmentation.onResults(onResults);
+
+        const videoElement = document.createElement("video");
+        videoElement.srcObject = res;
+        videoElement.autoplay = true;
+
+
+
+        const update = function () {
+          window.start = Date.now();
+          selfieSegmentation.send({ image: videoElement });
+          requestAnimationFrame(() => update());
+        }
+
+        videoElement.addEventListener("playing", () => {
+          update();
+        });
+
+
+        // videoElement.requestVideoFrameCallback(newFrame);
+
+        // const camera = new Camera(videoElement, {
+        //   onFrame: async () => {
+        //     await selfieSegmentation.send({ image: videoElement });
+        //   },
+        //   width: 1280,
+        //   height: 720
+        // });
+        // camera.start();
+
+
+        return canvasElement.captureStream();
+      }
+
+
+      const res2 = await getUserMediaFn.call(navigator.mediaDevices, ...arguments)
+      return res2
     }
 
     console.log('VIRTUAL WEBCAM INSTALLED.')
 
 
   </script>
-  
+
   <!-- show web cam -->
   <script>
     var video = document.querySelector("#webcam");
@@ -175,6 +178,6 @@
         });
         camera.start();
       </script> -->
-  </body>
+</body>
 
 </html>
