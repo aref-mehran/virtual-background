@@ -7,14 +7,13 @@ import SourceConfigCard from './core/components/SourceConfigCard'
 import ViewerCard from './core/components/ViewerCard'
 import {
   BackgroundConfig,
-  backgroundImageUrls,
+  backgroundImageUrls
 } from './core/helpers/backgroundHelper'
 import { PostProcessingConfig } from './core/helpers/postProcessingHelper'
 import { SegmentationConfig } from './core/helpers/segmentationHelper'
 import { SourceConfig, sourceImageUrls } from './core/helpers/sourceHelper'
 import useBodyPix from './core/hooks/useBodyPix'
 import useTFLite from './core/hooks/useTFLite'
-import './js/main'
 function App() {
   const classes = useStyles()
   const [sourceConfig, setSourceConfig] = useState<SourceConfig>({
