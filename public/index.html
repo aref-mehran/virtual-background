@@ -1,129 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
-    crossorigin="anonymous"></script>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Demo on adding virtual background to a live video stream in the browser" />
+  <!-- WebAssembly SIMD localhost -->
+  <meta http-equiv="origin-trial"
+    content="AsMmosnWaxFkDGFQwksPO8Q1xBi6DI9g5s8xJzIbH2Oj2rmSEgH+Mxfp2DRH1pqwC63eL7UBdqJ42OHxlgnqRAMAAABSeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJmZWF0dXJlIjoiV2ViQXNzZW1ibHlTaW1kIiwiZXhwaXJ5IjoxNjIzODAxNTk5fQ==" />
+  <!-- WebAssembly SIMD volcomix.github.io -->
+  <meta http-equiv="origin-trial"
+    content="AlxPo/PmcsQjg19KZiW6iITwQCKgA9nyPThRtc9PZkdECeX0LLcgI9bWsckNpn/UPVLl/nNELtXA+XkwHP3a9QgAAABbeyJvcmlnaW4iOiJodHRwczovL3ZvbGNvbWl4LmdpdGh1Yi5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViQXNzZW1ibHlTaW1kIiwiZXhwaXJ5IjoxNjIzODAxNTk5fQ==" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  <title>Virtual Background</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <script src="%PUBLIC_URL%/tflite/tflite.js"></script>
+  <script src="%PUBLIC_URL%/tflite/tflite-simd.js"></script>
 </head>
 
 <body>
-  <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
 
-  <script>
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
 
-    const getUserMediaFn = MediaDevices.prototype.getUserMedia;
-
-    MediaDevices.prototype.getUserMedia = async function () {
-      const args = arguments
-      // console.log(args[0])
-
-      // This constraints could mimick closely the request.
-      // Also, there could be a preferred webcam on the options.
-      // Right now it defaults to the predefined input.
-      const constraints = {
-        video: {
-          facingMode: args[0].facingMode,
-          advanced: args[0].video.advanced,
-          width: args[0].video.width,
-          height: args[0].video.height,
-        },
-        audio: false,
-      }
-
-      const selfieSegmentation = new SelfieSegmentation({
-        locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
-        }
-      });
-
-      await selfieSegmentation.initialize();
-      const res = await getUserMediaFn.call(
-        navigator.mediaDevices,
-        constraints
-      )
-      if (res) {
-        // const filter = new FilterStream(res, shader)
-        // return filter.outputStream;
-        const canvasElement = document.createElement("canvas");
-        const canvasCtx = canvasElement.getContext('2d');
-
-        onResults = async function (results) {
-          // console.log(Date.now() - window.start);
-
-          canvasCtx.save();
-          canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-          canvasCtx.drawImage(results.segmentationMask, 0, 0,
-            canvasElement.width, canvasElement.height);
-
-          // Only overwrite existing pixels.
-          canvasCtx.globalCompositeOperation = 'source-in';
-          canvasCtx.fillStyle = '#00FF00';
-          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-
-          // Only overwrite missing pixels.
-          canvasCtx.globalCompositeOperation = 'destination-atop';
-          canvasCtx.drawImage(
-            results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-          canvasCtx.restore();
-        }
-
-        selfieSegmentation.setOptions({
-          modelSelection: 1,
-        });
-        selfieSegmentation.onResults(onResults);
-
-        const videoElement = document.createElement("video");
-        videoElement.srcObject = res;
-        videoElement.autoplay = true;
-
-
-
-        const update = function () {
-          window.start = Date.now();
-          selfieSegmentation.send({ image: videoElement });
-          requestAnimationFrame(() => update());
-        }
-
-        videoElement.addEventListener("playing", () => {
-          update();
-        });
-
-
-        return canvasElement.captureStream();
-      }
-
-
-      const res2 = await getUserMediaFn.call(navigator.mediaDevices, ...arguments)
-      return res2
-    }
-
-    console.log('VIRTUAL WEBCAM INSTALLED.')
-
-
-  </script>
-
-  <!-- show web cam -->
-  <script>
-    var video = document.querySelector("#webcam");
-
-    if (navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function (stream) {
-          video.srcObject = stream;
-        })
-        .catch(function (err0r) {
-          console.log("Something went wrong!");
-        });
-    }
-
-  </script>
-
-
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
 </body>
 
 </html>
