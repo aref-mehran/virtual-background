@@ -21,11 +21,11 @@
 <script type="module">
     const videoElement = document.getElementsByClassName('input_video')[0];
     const canvasElement = document.getElementsByClassName('output_canvas')[0];
-      let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-      let stream_settings = stream.getVideoTracks()[0].getSettings();
-      canvasElement.width = stream_settings.width;
-      canvasElement.height = stream_settings.height;
+    let stream_settings = stream.getVideoTracks()[0].getSettings();
+    canvasElement.width = stream_settings.width;
+    canvasElement.height = stream_settings.height;
 
   const canvasCtx = canvasElement.getContext('2d');
 
@@ -40,7 +40,7 @@
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
 
-    
+
     // Only overwrite missing pixels.
     canvasCtx.globalCompositeOperation = 'destination-atop';
     canvasCtx.filter = 'blur(5px)';
@@ -50,7 +50,7 @@
 
     canvasCtx.restore();
 
-    
+
     canvasCtx.restore();
   }
 
@@ -71,5 +71,5 @@
     width: 1280,
     height: 720
   });
-                              camera.start();
+    camera.start();
 </script>
