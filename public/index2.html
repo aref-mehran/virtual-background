@@ -91,12 +91,21 @@
         videoElement.srcObject = res;
         videoElement.autoplay = true;
 
+        //     async function render() {
+        //   if (!shouldRender) {
+        //     return
+        //   }
+        //   beginFrame()
+        //   await newPipeline.render()
+        //   endFrame()
+        //   renderRequestId = requestAnimationFrame(render)
+        // }
 
 
-        const update = function () {
+        const update = async function () {
           window.start = Date.now();
-          selfieSegmentation.send({ image: videoElement });
-          requestAnimationFrame(() => update());
+          await selfieSegmentation.send({ image: videoElement });
+          requestAnimationFrame(update);
         }
 
         update();
