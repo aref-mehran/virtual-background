@@ -12,35 +12,39 @@
 
 <body>
   <div class="container">
-  <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
+    <video class="input_video"></video>
     <canvas class="output_canvas" width="1280px" height="720px"></canvas>
   </div>
 </body>
 
 </html>
-
 <script type="module">
-                        const videoElement = document.createElement("video");
-                        const canvasElement = document.createElement("canvas");
-                        window.canvasElement = canvasElement;
+    const videoElement = document.getElementsByClassName('input_video')[0];
+    const canvasElement = document.getElementsByClassName('output_canvas')[0];
   const canvasCtx = canvasElement.getContext('2d');
 
   function onResults(results) {
+
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(results.segmentationMask, 0, 0,
-      canvasElement.width, canvasElement.height);
-
-    // Only overwrite existing pixels.
-    canvasCtx.globalCompositeOperation = 'source-in';
-    canvasCtx.fillStyle = '#00FF00';
-    canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
 
     // Only overwrite missing pixels.
+    canvasCtx.globalCompositeOperation = 'source-in';
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+
+    
+    // Only overwrite missing pixels.
     canvasCtx.globalCompositeOperation = 'destination-atop';
+    canvasCtx.filter = 'blur(5px)';
+
     canvasCtx.drawImage(
       results.image, 0, 0, canvasElement.width, canvasElement.height);
 
+    canvasCtx.restore();
+
+    
     canvasCtx.restore();
   }
 
@@ -61,44 +65,5 @@
     width: 1280,
     height: 720
   });
-    console.log(camera)
-  camera.start();
-
-
-
-  MediaDevices.prototype.getUserMedia = async function () {
-    if (window.called) {
-      while (!window.bluredWebcamStream) {
-        await new Promise(resolve => setTimeout(resolve, 50)); // 50ms
-      }
-    }
-    window.called = true;
-    if (window.bluredWebcamStream) {
-      return window.bluredWebcamStream;
-    }
-
-    window.bluredWebcamStream = window.canvasElement.captureStream();
-
-    return window.bluredWebcamStream;
-
-  }
-  console.log('VIRTUAL WEBCAM INSTALLED.')
-
-  var video = document.querySelector("#webcam");
-
-  if (navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(function (stream) {
-        video.srcObject = stream;
-      })
-      .catch(function (err0r) {
-        console.log(err0r);
-      });
-  }
-
-
-
-
-
-
+                              camera.start();
 </script>
