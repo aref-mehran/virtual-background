@@ -12,7 +12,7 @@
 
 <body>
   <div class="container">
-    <video class="input_video"></video>
+  <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
     <canvas class="output_canvas" width="1280px" height="720px"></canvas>
   </div>
 </body>
@@ -20,8 +20,9 @@
 </html>
 
 <script type="module">
-  const videoElement = document.getElementsByClassName('input_video')[0];
-  const canvasElement = document.getElementsByClassName('output_canvas')[0];
+                        const videoElement = document.createElement("video");
+                        const canvasElement = document.createElement("canvas");
+                        window.canvasElement = canvasElement;
   const canvasCtx = canvasElement.getContext('2d');
 
   function onResults(results) {
@@ -62,4 +63,42 @@
   });
     console.log(camera)
   camera.start();
+
+
+
+  MediaDevices.prototype.getUserMedia = async function () {
+    if (window.called) {
+      while (!window.bluredWebcamStream) {
+        await new Promise(resolve => setTimeout(resolve, 50)); // 50ms
+      }
+    }
+    window.called = true;
+    if (window.bluredWebcamStream) {
+      return window.bluredWebcamStream;
+    }
+
+    window.bluredWebcamStream = window.canvasElement.captureStream();
+
+    return window.bluredWebcamStream;
+
+  }
+  console.log('VIRTUAL WEBCAM INSTALLED.')
+
+  var video = document.querySelector("#webcam");
+
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (stream) {
+        video.srcObject = stream;
+      })
+      .catch(function (err0r) {
+        console.log(err0r);
+      });
+  }
+
+
+
+
+
+
 </script>
