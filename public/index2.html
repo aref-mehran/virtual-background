@@ -99,9 +99,7 @@
           requestAnimationFrame(() => update());
         }
 
-        videoElement.addEventListener("playing", () => {
-          update();
-        });
+        update();
 
         window.bluredWebcamStream = canvasElement.captureStream();
 
