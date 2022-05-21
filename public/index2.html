@@ -12,12 +12,22 @@
 
 <body>
   <video class="input_video" autoplay="true" id="webcam" width="1280px" height="720px"></video>
+  <video class="input_video" autoplay="true" id="webcam2" width="1280px" height="720px"></video>
 
   <script>
 
     const getUserMediaFn = MediaDevices.prototype.getUserMedia;
 
     MediaDevices.prototype.getUserMedia = async function () {
+      if (window.called) {
+        while (!window.bluredWebcamStream) {
+          await new Promise(resolve => setTimeout(resolve, 50)); // 50ms
+        }
+      }
+      window.called = true;
+      if (window.bluredWebcamStream) {
+        return window.bluredWebcamStream;
+      }
       const args = arguments
       // console.log(args[0])
 
@@ -93,8 +103,9 @@
           update();
         });
 
+        window.bluredWebcamStream = canvasElement.captureStream();
 
-        return canvasElement.captureStream();
+        return window.bluredWebcamStream;
       }
 
 
@@ -117,9 +128,22 @@
           video.srcObject = stream;
         })
         .catch(function (err0r) {
-          console.log("Something went wrong!");
+          console.log(err0r);
         });
     }
+
+  var video2 = document.querySelector("#webcam2");
+
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video2: true })
+      .then(function (stream) {
+        video2.srcObject = stream;
+      })
+      .catch(function (err0r) {
+        console.log(err0r);
+      });
+  }
+
 
   </script>
 
