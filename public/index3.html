@@ -13,7 +13,7 @@
 <body>
   <div class="container">
     <video class="input_video"></video>
-    <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    <canvas class="output_canvas"></canvas>
   </div>
 </body>
 
@@ -21,6 +21,12 @@
 <script type="module">
     const videoElement = document.getElementsByClassName('input_video')[0];
     const canvasElement = document.getElementsByClassName('output_canvas')[0];
+      let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+      let stream_settings = stream.getVideoTracks()[0].getSettings();
+      canvasElement.width = stream_settings.width;
+      canvasElement.height = stream_settings.height;
+
   const canvasCtx = canvasElement.getContext('2d');
 
   function onResults(results) {
