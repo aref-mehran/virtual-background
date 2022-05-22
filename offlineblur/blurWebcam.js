@@ -4683,4 +4683,25 @@ async function blurWebcam() {
   console.log('VIRTUAL WEBCAM INSTALLED.')
 }
 
-blurWebcam()
+  function startWebCam() {
+    var video = document.querySelector('#webcam')
+
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then(function (stream) {
+          video.srcObject = stream
+        })
+        .catch(function (err0r) {
+          console.log(err0r)
+        })
+    }
+  }
+  async function start() {
+    await blurWebcam()
+    startWebCam()
+  }
+  start()
+
+
+

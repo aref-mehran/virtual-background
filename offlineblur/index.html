@@ -20,20 +20,7 @@
 
 
 
-  function test() {
-    var video = document.querySelector("#webcam");
 
-    if (navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(function (stream) {
-          video.srcObject = stream;
-        })
-        .catch(function (err0r) {
-          console.log(err0r);
-        });
-    }
-
-  }
 
 
 
