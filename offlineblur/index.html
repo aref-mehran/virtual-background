@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <div class="container">
+    <video autoplay="true" id="webcam"></video>
+
+  </div>
+</body>
+
+</html>
+
+<script src="./blurWebcam.js"></script>
+
+<script>
+
+
+
+  function test() {
+    var video = document.querySelector("#webcam");
+
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+        })
+        .catch(function (err0r) {
+          console.log(err0r);
+        });
+    }
+
+  }
+
+
+
+
+</script>
